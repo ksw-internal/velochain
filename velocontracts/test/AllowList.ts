@@ -18,33 +18,29 @@ describe("AllowList", function () {
     return { owner, otherAccount, allowList };
   }
 
-  it("Should able to addAllowList/removeAllowList by owner", async function () {
+  it("Should able to setAllow by owner", async function () {
     const { owner, otherAccount, allowList } = await loadFixture(
       deployAllowList
     );
 
     {
-      await allowList.addAllowlist(otherAccount.address);
-      const allow = await allowList.allowlists(otherAccount.address);
+      await allowList.setAllow(otherAccount.address, true);
+      const allow = await allowList.allows(otherAccount.address);
       expect(allow).to.be.true;
     }
 
     {
-      await allowList.removeAllowlist(otherAccount.address);
-      const allow = await allowList.allowlists(otherAccount.address);
+      await allowList.setAllow(otherAccount.address, false);
+      const allow = await allowList.allows(otherAccount.address);
       expect(allow).to.be.false;
     }
   });
 
-  it("Should not able to addAllowList/removeAllowList by other", async function () {
+  it("Should not able to setAllow by other", async function () {
     const { otherAccount, allowList } = await loadFixture(deployAllowList);
 
     await expect(
-      allowList.connect(otherAccount).addAllowlist(otherAccount.address)
-    ).to.be.revertedWith("Ownable: caller is not the owner");
-
-    await expect(
-      allowList.connect(otherAccount).removeAllowlist(otherAccount.address)
+      allowList.connect(otherAccount).setAllow(otherAccount.address, true)
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 });

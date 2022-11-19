@@ -5,13 +5,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AllowList is Ownable {
 
-    mapping(address => bool) public allowlists;
+    mapping(address => bool) public allows;
 
-    function addAllowlist(address _address) public onlyOwner {
-        allowlists[_address] = true;
+    event Allow(address indexed account, bool isAllow);
+
+    function setAllow(address _address, bool value) public onlyOwner {
+        allows[_address] = value;
+        emit Allow(_address, value);
     }
 
-    function removeAllowlist(address _address) public onlyOwner {
-        allowlists[_address] = false;
-    }
 }
