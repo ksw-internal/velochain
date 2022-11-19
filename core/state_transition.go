@@ -17,9 +17,11 @@
 package core
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"math/big"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	cmath "github.com/ethereum/go-ethereum/common/math"
@@ -39,8 +41,10 @@ The state transitioning model does all the necessary work to work out a valid ne
 3) Create a new state object if the recipient is \0*32
 4) Value transfer
 == If contract creation ==
-  4a) Attempt to run transaction data
-  4b) If valid, use result as code for the new state object
+
+	4a) Attempt to run transaction data
+	4b) If valid, use result as code for the new state object
+
 == end ==
 5) Run Script section
 6) Derive new state root
@@ -249,13 +253,13 @@ func (st *StateTransition) preCheck() error {
 // TransitionDb will transition the state by applying the current message and
 // returning the evm execution result with following fields.
 //
-// - used gas:
-//      total gas used (including gas being refunded)
-// - returndata:
-//      the returned data from evm
-// - concrete execution error:
-//      various **EVM** error which aborts the execution,
-//      e.g. ErrOutOfGas, ErrExecutionReverted
+//   - used gas:
+//     total gas used (including gas being refunded)
+//   - returndata:
+//     the returned data from evm
+//   - concrete execution error:
+//     various **EVM** error which aborts the execution,
+//     e.g. ErrOutOfGas, ErrExecutionReverted
 //
 // However if any consensus issue encountered, return the error directly with
 // nil evm execution result.
@@ -308,6 +312,20 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 		vmerr error // vm errors do not effect consensus and are therefore not assigned to err
 	)
 	if contractCreation {
+		// VeloChain: only sender in allow list contract can create contract
+		{
+			contractAddr := common.StringToAddress("0x00000000000000000000000000000000000000FF")
+			senderAddr := strings.ToLower(strings.TrimPrefix(sender.Address().String(), "0x"))
+			input := common.Hex2Bytes("0x1d4f4629000000000000000000000000" + senderAddr)
+			callGas := uint64(50000)
+			allowRet, _, err := st.evm.Call(sender, contractAddr, input, callGas, big.NewInt(0))
+			if err != nil {
+				return nil, err
+			}
+			if !bytes.Equal(allowRet, common.Hex2Bytes("0x0000000000000000000000000000000000000000000000000000000000000001")) {
+				return nil, fmt.Errorf("sender %v not in allow list", senderAddr)
+			}
+		}
 		ret, _, st.gas, vmerr = st.evm.Create(sender, st.data, st.gas, st.value)
 	} else {
 		// Increment the nonce for the next transaction
