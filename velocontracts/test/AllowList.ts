@@ -43,4 +43,22 @@ describe("AllowList", function () {
       allowList.connect(otherAccount).setAllow(otherAccount.address, true)
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
+
+  it("Encode allows", async function () {
+    const { otherAccount, allowList } = await loadFixture(deployAllowList);
+    const data = allowList.interface.encodeFunctionData("allows", [
+      otherAccount.address,
+    ]);
+    console.log('data', data);
+    console.log('account', otherAccount.address)
+
+    const gas = await allowList.estimateGas.allows(otherAccount.address)
+    console.log('gas', gas.toNumber())
+
+    const resultTrue = allowList.interface.encodeFunctionResult("allows", [true]);
+    console.log('result true', resultTrue)
+
+    const resultFalse = allowList.interface.encodeFunctionResult("allows", [false]);
+    console.log('result false', resultFalse)
+  });
 });
