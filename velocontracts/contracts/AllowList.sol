@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AllowList is Ownable {
-
+    bool private inited;
     mapping(address => bool) public allows;
 
     event Allow(address indexed account, bool isAllow);
@@ -14,4 +14,9 @@ contract AllowList is Ownable {
         emit Allow(_address, value);
     }
 
+    function init() external {
+        require(!inited, "already inited");
+        inited = true;
+        transferOwnership(msg.sender);
+    }
 }
