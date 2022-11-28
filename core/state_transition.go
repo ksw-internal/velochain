@@ -27,6 +27,7 @@ import (
 	cmath "github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 )
 
@@ -316,15 +317,18 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 		{
 			contractAddr := common.StringToAddress("0x00000000000000000000000000000000000000ff")
 			senderAddr := strings.ToLower(strings.TrimPrefix(sender.Address().String(), "0x"))
-			input := common.Hex2Bytes("0x1d4f4629000000000000000000000000" + senderAddr)
+			input := common.Hex2Bytes("1d4f4629000000000000000000000000" + senderAddr)
 			callGas := uint64(50000)
+			log.Info("Calling allow list contract", "contractAddr", contractAddr, "senderAddr", senderAddr)
 			allowRet, _, err := st.evm.Call(sender, contractAddr, input, callGas, big.NewInt(0))
 			if err != nil {
 				return nil, err
 			}
-			if !bytes.Equal(allowRet, common.Hex2Bytes("0x0000000000000000000000000000000000000000000000000000000000000001")) {
+			if !bytes.Equal(allowRet, common.Hex2Bytes("0000000000000000000000000000000000000000000000000000000000000001")) {
+				log.Warn("sender not in allow list, cannot create contract", "sender", senderAddr)
 				return nil, fmt.Errorf("sender %v not in allow list", senderAddr)
 			}
+			log.Info("sender in allow list", "sender", senderAddr)
 		}
 		ret, _, st.gas, vmerr = st.evm.Create(sender, st.data, st.gas, st.value)
 	} else {

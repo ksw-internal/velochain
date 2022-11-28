@@ -17,6 +17,6 @@ contract AllowList is Ownable {
     function init() external {
         require(!inited, "already inited");
         inited = true;
-        transferOwnership(msg.sender);
+        _transferOwnership(msg.sender);
     }
 }
