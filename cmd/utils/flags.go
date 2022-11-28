@@ -1653,13 +1653,13 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *ethconfig.Config) {
 	switch {
 	case ctx.GlobalBool(MainnetFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 55555
+			cfg.NetworkId = 56789
 		}
 		cfg.Genesis = core.DefaultVeloMainnetGenesisBlock()
 		// SetDNSDiscoveryDefaults(cfg, params.ReiMainnetGenesisHash)
 	case ctx.GlobalBool(TestnetFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 55556
+			cfg.NetworkId = 56790
 		}
 		cfg.Genesis = core.DefaultVeloTestnetGenesisBlock()
 		// SetDNSDiscoveryDefaults(cfg, params.ReiTestnetGenesisHash)
