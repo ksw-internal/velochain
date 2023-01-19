@@ -315,7 +315,7 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 	if contractCreation {
 		// VeloChain: only sender in allow list contract can create contract
 		{
-			contractAddr := common.StringToAddress("0x00000000000000000000000000000000000000ff")
+			contractAddr := common.HexToAddress("0x00000000000000000000000000000000000000ff")
 			senderAddr := strings.ToLower(strings.TrimPrefix(sender.Address().String(), "0x"))
 			input := common.Hex2Bytes("1d4f4629000000000000000000000000" + senderAddr)
 			callGas := uint64(50000)
