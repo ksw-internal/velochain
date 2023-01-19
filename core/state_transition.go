@@ -319,13 +319,14 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 			senderAddr := strings.ToLower(strings.TrimPrefix(sender.Address().String(), "0x"))
 			input := common.Hex2Bytes("1d4f4629000000000000000000000000" + senderAddr)
 			callGas := uint64(50000)
-			log.Info("Calling allow list contract", "contractAddr", contractAddr, "senderAddr", senderAddr)
+			log.Info("Calling allow list contract", "contractAddr", contractAddr.String(), "senderAddr", sender.Address().String())
 			allowRet, _, err := st.evm.Call(sender, contractAddr, input, callGas, big.NewInt(0))
 			if err != nil {
 				return nil, err
 			}
+			log.Info("Called allow list contract", "contractAddr", contractAddr.String(), "senderAddr", sender.Address().String(), "ret", allowRet)
 			if !bytes.Equal(allowRet, common.Hex2Bytes("0000000000000000000000000000000000000000000000000000000000000001")) {
-				log.Warn("sender not in allow list, cannot create contract", "sender", senderAddr)
+				log.Warn("sender not in allow list, cannot create contract", "sender", sender.Address().String())
 				return nil, fmt.Errorf("sender %v not in allow list", senderAddr)
 			}
 			log.Info("sender in allow list", "sender", senderAddr)
